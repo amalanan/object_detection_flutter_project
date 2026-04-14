@@ -1,45 +1,7 @@
-// import 'package:camera/camera.dart';
-// import 'package:flutter/material.dart';
-// import 'package:object_detecation_project/main.dart';
-//
-// class MyHomePage extends StatefulWidget {
-//   const MyHomePage({super.key});
-//
-//   @override
-//   State<MyHomePage> createState() => _MyHomePageState();
-// }
-//
-// class _MyHomePageState extends State<MyHomePage> {
-//   bool isWorking = false;
-//   String result = "";
-//   CameraController cameraController;
-//   CameraImage imgCamera;
-//
-//   initCamera(){
-//     cameraController = CameraController(cameras[0], ResolutionPreset.medium);
-//     cameraController.initialize().then((value){
-//       if(!mounted){
-//        return;
-//       }
-//       setState(() {
-//         cameraController.startImageStream((imageFromStream) =>{
-//           if(!isWorking){
-//             isWorking = true,
-//             imgCamera = imageFromStream,
-//           }
-//         });
-//
-//       });
-//     });
-//   }
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Placeholder();
-//   }
-// }
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:object_detecation_project/main.dart';
+import 'package:tflite/tflite.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -58,12 +20,19 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    loadModel();
     initCamera();
   }
 
+  loadModel() async {
+    await Tflite.loadModel(
+      model: 'mobilenet_v1_1.0_224.tflite',
+      labels: 'mobilenet_v1_1.0_224.txt',
+    );
+  }
+
   initCamera() {
-    cameraController =
-        CameraController(cameras![0], ResolutionPreset.medium);
+    cameraController = CameraController(cameras![0], ResolutionPreset.medium);
 
     cameraController.initialize().then((value) {
       if (!mounted) return;
@@ -72,17 +41,15 @@ class _MyHomePageState extends State<MyHomePage> {
         if (!isWorking) {
           isWorking = true;
           imgCamera = imageFromStream;
-
-          // هون لاحقاً بتحط inference (deep learning)
         }
       });
-
       setState(() {});
     });
   }
 
   @override
-  void dispose() {
+  void dispose() async {
+    await Tflite.close();
     cameraController.dispose();
     super.dispose();
   }
@@ -93,8 +60,6 @@ class _MyHomePageState extends State<MyHomePage> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Scaffold(
-      body: CameraPreview(cameraController),
-    );
+    return Scaffold(body: CameraPreview(cameraController));
   }
 }
