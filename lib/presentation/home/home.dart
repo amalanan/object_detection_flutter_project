@@ -240,7 +240,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
       recognitions?.forEach((response) {
         result +=
-        "${response["label"]} ${(response["confidence"] as double).toStringAsFixed(2)}\n\n";
+        "${response["label"]} ${(response["confidence"] as double)
+            .toStringAsFixed(2)}\n\n";
       });
 
       if (mounted) {
